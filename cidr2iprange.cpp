@@ -1,21 +1,24 @@
-// Subnet Calculator, by rocco castoro
-// #include "stdafx.h"
+// Subnet Calculator, inspired by: Rocco Castoro
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include <sstream>
 #include <stdio.h>
 #include <math.h>
+
 using namespace std;
 
 int getOctetsIP(string ip, vector<int> &octetsIP)
-{                           // Define vector<int> octets, using reference from main
-      stringstream sip(ip); // use stringstream named ss and populate with ip
+{
+      stringstream sip(ip); // use stringstream named sip and populate with ip
       string temp;
       octetsIP.clear(); // Clears the octetsMask vector, in case main function re-runs this function
       vector<bool> ipInRange;
+
       while (getline(sip, temp, '.'))               // Every time getline recieves new stream element from ss, save to temp
             octetsIP.push_back(atoi(temp.c_str())); //... until reaches '.' delimiter, then push_back octet with new element.
+
       if (octetsIP.size() == 4)
       {
             for (int i = 0; i < octetsIP.size(); i++)
@@ -37,10 +40,10 @@ int getOctetsIP(string ip, vector<int> &octetsIP)
                   return 1;
             }
       }
+
       else
       {
-            cout << endl
-                 << "Please enter four octets in dot notation." << endl
+            cout << "Please enter four octets in dot notation." << endl
                  << endl;
             return 1;
       }
@@ -78,7 +81,7 @@ int getOctetsMask(string mask, vector<int> &octetsMask)
       else
       {
             cout << endl
-                 << "Please enter four octets in dot notation." << endl
+                 << "Please enter four octets in dot notation."
                  << endl;
             return 1;
       }
@@ -134,7 +137,7 @@ int getNHBits(vector<int> &octetsIP, vector<int> &octetsMask, vector<int> &octet
 
       // Get IP binary rep. //
       cout << "------------------------------------------" << endl;
-      cout << "///////// Binary Representation //////////" << endl;
+      cout << "~ Binary Representation ~" << endl;
       cout << "------------------------------------------" << endl;
       for (int j = 0; j < octetsIP.size(); j++)
       {
@@ -447,138 +450,120 @@ int getHostsPerSubnet(vector<int> &decimalMask)
 
 int main()
 {
+      cout << "----------------------------\n";
+      cout << "IPv4 Subnetting Calculator\n";
+      cout << "----------------------------\n";
+      cout << "\n\n";
 
-      // Give details, given an IP and Subnet Mask //
-      char resp = 'y';
-      while (resp == 'y')
+      // Get IP address octets
+      string ip;
+      vector<int> octetsIP;
+      while (getOctetsIP(ip, octetsIP) == 1)
       {
-            cout << " //// -- IPv4 Subnetting Calculator -- \\\\\\\\" << endl;
-            cout << "||||  ----- dev. by Rocco Castoro ----- ||||" << endl;
-            cout << " \\\\\\\\ ----- rockycast@hotmail.com ---- ////" << endl;
-            cout << endl
-                 << endl;
-
-            // Get IP address octets //
-            string ip;
-            vector<int> octetsIP;
-            while (getOctetsIP(ip, octetsIP) == 1)
-            {
-                  cout << "Enter IPv4 Address -> ";
-                  (getline(cin, ip)); // Accept user input for IP Address //
-            }
-
-            // Get subnet mask octets //
-            string mask;
-            vector<int> octetsMask;
-            while (getOctetsMask(mask, octetsMask) == 1)
-            {
-                  cout << endl
-                       << "Enter subnet mask for " << ip << " -> ";
-                  (getline(cin, mask)); // Accept user input for subnet mask //
-            }
-            cout << endl
-                 << endl
-                 << endl
-                 << endl
-                 << endl;
-
-            // Print Initial User IP and Subnet Mask //
-            vector<int> decimals;
-            cout << "//////////////////////////////////////////" << endl;
-            cout << "/// IP Address: " << toString(octetsIP) << endl;
-            vector<int> decimalMask = toDecimal(octetsMask, decimals);
-            cout << "/// Subnet Mask: " << toString(octetsMask) << endl;
-            cout << "//////////////////////////////////////////" << endl
-                 << endl;
-
-            // Print Binary Representation //
-            vector<int> octetsIPBits;
-            vector<int> octetsMaskBits;
-            getNHBits(octetsIP, octetsMask, octetsIPBits, octetsMaskBits);
-            vector<int> netID = getNetID(octetsIP, octetsMask);
-            vector<int> decimalNetID = toDecimal(netID, decimals);
-            int netInc = getIncrement(decimalMask, decimalNetID);
-            cout << endl;
-
-            // Print IP Class
-            // Run function to determine and print IP class
-            cout << "------------------------------------------" << endl;
-            cout << "//////////// Class Information ///////////" << endl;
-            cout << "------------------------------------------" << endl;
-            int classResult = calcClass(octetsIP);
-            int ipClass = 0;
-            switch (classResult)
-            {
-            case 1:
-                  cout << "IP Class: Private block, Class 'A' " << endl;
-                  ipClass = 1;
-                  break;
-            case 2:
-                  cout << "IP Class: Private block, Class 'B'" << endl;
-                  ipClass = 2;
-                  break;
-            case 3:
-                  cout << "IP Class: Private block, Class 'C'" << endl;
-                  ipClass = 3;
-                  break;
-            case 4:
-                  cout << "IP Class: Reserved block, System Loopback Address" << endl;
-                  ipClass = 1;
-                  break;
-            case 5:
-                  cout << "IP Class: A" << endl;
-                  ipClass = 1;
-                  break;
-            case 6:
-                  cout << "IP Class: B" << endl;
-                  ipClass = 2;
-                  break;
-            case 7:
-                  cout << "IP Class: C" << endl;
-                  ipClass = 3;
-                  break;
-            case 8:
-                  cout << "IP Class: D" << endl;
-                  ipClass = 4;
-                  cout << "!! This is a reserved Class D Multicast IP Address Block" << endl;
-                  break;
-            case 9:
-                  cout << "IP Class: E" << endl;
-                  ipClass = 5;
-                  cout << "!! This is a reserved Class E Multicast IP Address Block" << endl;
-                  break;
-            default:
-                  cout << "Not in Range" << endl;
-                  break;
-            }
-            vector<int> subClassMask;
-            getSubnets(decimalMask, ipClass, subClassMask);
-            cout << "Default Class Subnet Mask: " << toString(subClassMask) << endl;
-            cout << "-----------------------------------------" << endl
-                 << endl;
-
-            // Print Subnetting Details //
-            cout << "------------------------------------------" << endl;
-            cout << "///////////// Subnet Details /////////////" << endl;
-            cout << "------------------------------------------" << endl;
-            vector<int> netIDRange = getNetIDRange(decimalNetID, netInc, decimalMask);
-            cout << "Network ID:            -           Broadcast ID: " << endl;
-            cout << "-------------------------------------------------" << endl;
-            cout << toString(netID) << " - [ usable hosts ] - ";
-            cout << toString(netIDRange) << endl
-                 << endl;
-            cout << "Network Increment: " << getIncrement(decimalMask, decimalNetID) << endl;
-            cout << "Number of Subnets: " << getSubnets(decimalMask, ipClass, subClassMask) << endl;
-            cout << "Usable hosts per subnet: " << getHostsPerSubnet(decimalMask) << endl;
-            cout << "-----------------------------------------" << endl
-                 << endl;
-
-            cout << "Would you like to enter another IP Address to subnet? (y or n): ";
-            cin >> resp;
-            cout << endl
-                 << endl
-                 << endl
-                 << endl;
+            cout << "Enter IPv4 Address -> ";
+            (getline(cin, ip)); // Accept user input for IP Address
       }
+
+      // Get subnet mask octets
+      string mask;
+      vector<int> octetsMask;
+      while (getOctetsMask(mask, octetsMask) == 1)
+      {
+            cout << endl
+                 << "Enter subnet mask for " << ip << " -> ";
+            (getline(cin, mask)); // Accept user input for subnet mask
+      }
+
+
+      // Print Initial User IP and Subnet Mask
+      vector<int> decimals;
+      cout << "\n\n--------------------------------------------" << endl;
+      cout << "IP Address: " << toString(octetsIP) << endl;
+      vector<int> decimalMask = toDecimal(octetsMask, decimals);
+      cout << "Subnet Mask: " << toString(octetsMask) << endl;
+      cout << "--------------------------------------------" << endl
+           << endl;
+
+      // Print Binary Representation
+      vector<int> octetsIPBits;
+      vector<int> octetsMaskBits;
+      getNHBits(octetsIP, octetsMask, octetsIPBits, octetsMaskBits);
+      vector<int> netID = getNetID(octetsIP, octetsMask);
+      vector<int> decimalNetID = toDecimal(netID, decimals);
+      int netInc = getIncrement(decimalMask, decimalNetID);
+      cout << endl;
+
+      // Print IP Class
+      // Run function to determine and print IP class
+      cout << "------------------------------------------" << endl;
+      cout << "~ Class Information ~" << endl;
+      cout << "------------------------------------------" << endl;
+      int classResult = calcClass(octetsIP);
+      int ipClass = 0;
+      switch (classResult)
+      {
+      case 1:
+            cout << "IP Class: Private block, Class 'A' " << endl;
+            ipClass = 1;
+            break;
+      case 2:
+            cout << "IP Class: Private block, Class 'B'" << endl;
+            ipClass = 2;
+            break;
+      case 3:
+            cout << "IP Class: Private block, Class 'C'" << endl;
+            ipClass = 3;
+            break;
+      case 4:
+            cout << "IP Class: Reserved block, System Loopback Address" << endl;
+            ipClass = 1;
+            break;
+      case 5:
+            cout << "IP Class: A" << endl;
+            ipClass = 1;
+            break;
+      case 6:
+            cout << "IP Class: B" << endl;
+            ipClass = 2;
+            break;
+      case 7:
+            cout << "IP Class: C" << endl;
+            ipClass = 3;
+            break;
+      case 8:
+            cout << "IP Class: D" << endl;
+            ipClass = 4;
+            cout << "!! This is a reserved Class D Multicast IP Address Block" << endl;
+            break;
+      case 9:
+            cout << "IP Class: E" << endl;
+            ipClass = 5;
+            cout << "!! This is a reserved Class E Multicast IP Address Block" << endl;
+            break;
+      default:
+            cout << "Not in Range" << endl;
+            break;
+      }
+      vector<int> subClassMask;
+      getSubnets(decimalMask, ipClass, subClassMask);
+      cout << "Default Class Subnet Mask: " << toString(subClassMask) << endl;
+      cout << "-----------------------------------------" << endl
+           << endl;
+
+      // Print Subnetting Details
+      cout << "------------------------------------------" << endl;
+      cout << "~ Subnet Details ~" << endl;
+      cout << "------------------------------------------" << endl;
+      vector<int> netIDRange = getNetIDRange(decimalNetID, netInc, decimalMask);
+      cout << "Network ID:            -           Broadcast ID: " << endl;
+      cout << "-------------------------------------------------" << endl;
+      cout << toString(netID) << " - [ usable hosts ] - ";
+      cout << toString(netIDRange) << endl
+           << endl;
+      cout << "Network Increment: " << getIncrement(decimalMask, decimalNetID) << endl;
+      cout << "Number of Subnets: " << getSubnets(decimalMask, ipClass, subClassMask) << endl;
+      cout << "Usable hosts per subnet: " << getHostsPerSubnet(decimalMask) << endl;
+      cout << "-----------------------------------------" << endl
+           << endl;
       return 0;
 }
